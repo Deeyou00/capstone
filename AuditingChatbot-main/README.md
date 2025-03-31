@@ -1,4 +1,4 @@
-# APAI4011_AuditingChatbot
+# AuditingChatbot
 
 # Finetune:
 	Qwen-2-7B-QA3000 (Baidu)
