@@ -1,3 +1,0 @@
-Select
-Gemma_9B_QA3000
-Qwen2_7B_QA3000
