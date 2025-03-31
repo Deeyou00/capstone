@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Inference Interface</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-3">Model Inference</h2>
+        
+        <!-- Model Selection Dropdown -->
+        <div class="mb-3">
+            <label for="modelSelect" class="form-label">Choose a Model:</label>
+            <select class="form-select" id="modelSelect">
+            </select>
+        </div>
+        
+        <!-- Chat Window -->
+        <div id="chatWindow" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+            Starting to Consult with your customized AI Auditing Agent...
+        </div>
+
+        <!-- Input and Send Button -->
+        <div class="mb-3">
+            <input type="text" class="form-control" id="userInput" placeholder="Type your message here...">
+            <button onclick="sendMessage()" class="btn btn-primary mt-2">Send</button>
+        </div>
+
+    </div>
+<<<<<<< HEAD
+
+    <div class="container mt-5">
+        <h3 class="mb-3">QARAG Chat Window</h3>
+        
+        <!-- Chat Window for QARAG -->
+        <div id="qaragChatWindow" style="height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+            Starting QARAG Consultation...
+        </div>
+    
+        <!-- Input and Send Button -->
+        <div class="mb-3">
+            <input type="text" class="form-control" id="qaragUserInput" placeholder="Type your question here...">
+            <button onclick="sendQARAGMessage()" class="btn btn-success mt-2">Send</button>
+        </div>
+    
+        <!-- File Upload for QARAG -->
+        <div class="mb-3">
+            <label for="qaragFileUpload" class="form-label">Upload a PDF:</label>
+            <input class="form-control" type="file" id="qaragFileUpload">
+        </div>
+    
+        <button onclick="uploadPDF()" class="btn btn-primary">Upload PDF</button>
+=======
+    
+    <div class="container mt-5">
+        <!-- File Upload Input -->
+        <div class="mb-3">
+            <label for="fileUpload" class="form-label">Upload a File:</label>
+            <input class="form-control" type="file" id="fileUpload">
+        </div>
+
+        <!-- Submit Button -->
+        <button id="submitButton" class="btn btn-primary">Submit</button>
+>>>>>>> 2ffd424 (Initial commit - reset history)
+    </div>
+</body>
+</html>
+
+<script>
+    // Function to populate the model selection dropdown
+    async function populateModelSelect() {
+        const response = await fetch('/models/models.txt');
+        const text = await response.text();
+        const models = text.split('\n').filter(model => model.trim() !== '');
+        const select = document.getElementById('modelSelect');
+        
+        models.forEach(model => {
+            const option = document.createElement('option');
+            option.value = model.trim();
+            option.textContent = model.trim();
+            select.appendChild(option);
+        });
+
+        // Listen for changes on the model selection dropdown
+        document.getElementById('modelSelect').addEventListener('change', function() {
+            initModel(this.value);
+        });
+    }
+
+    // Function to initialize the model
+    async function initModel(modelPath) {
+        try {
+            const response = await fetch(`/init-model/${encodeURIComponent(modelPath)}`);
+            const result = await response.json();
+            alert(result.message); // Show a success message
+        } catch (error) {
+            console.error('Error initializing model:', error);
+            alert('Failed to initialize model');
+        }
+    }
+
+    function sendMessage() {
+        const userInput = document.getElementById('userInput').value;
+        const chatWindow = document.getElementById('chatWindow');
+        const lastMessages = getLastMessages(chatWindow, 10); // Get the last 10 messages
+
+        // Include the last 10 messages with the current input
+        const fullInput = userInput // + '\n The reverse chat history is' + lastMessages;
+        console.log(fullInput);
+
+        chatWindow.innerHTML += `<p>You: ${userInput}</p>`;
+
+        fetch('/generate/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ text: fullInput }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            const generatedText = data.generated_text.replace(/\n/g, '<br>').replace(/\* /g, '<br>');            ; // Replace \n with HTML line breaks
+            chatWindow.innerHTML += `<p>AI: ${generatedText}</p>`;
+            document.getElementById('userInput').value = ''; // Clear input after sending
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Function to get the last 10 messages from the chat window
+    function getLastMessages(chatWindow, limit) {
+        const chatHtml = chatWindow.innerHTML;
+        const messages = chatHtml.split('</p>');
+        messages.pop(); // Remove the last empty element
+        messages.reverse(); // Reverse to start from the oldest message
+        const minRecord = Math.min(limit, messages.length);
+        const lastMessages = messages.slice(0, minRecord).reverse();
+        return lastMessages;
+    }
+
+    // Call the function on page load
+    window.onload = populateModelSelect;
+<<<<<<< HEAD
+
+    // Function to handle PDF upload
+    async function uploadPDF() {
+        const fileInput = document.getElementById('qaragFileUpload');
+        const file = fileInput.files[0];
+
+        if (!file) {
+            alert('Please select a PDF file to upload.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        let response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+            });
+
+            let result = await response.json();
+        console.log(result)
+    }
+
+    // Function to send a QARAG message
+    function sendQARAGMessage() {
+        const userInput = document.getElementById('qaragUserInput').value;
+        const chatWindow = document.getElementById('qaragChatWindow');
+        const pdfPath = '/Data/uploaded.pdf'; // Hardcoded path for the uploaded PDF
+
+        chatWindow.innerHTML += `<p>You: ${userInput}</p>`;
+
+        fetch(`/QARAG/?question=${encodeURIComponent(userInput)}&pdf_path=${encodeURIComponent(pdfPath)}`, {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            chatWindow.innerHTML += `<p>AI: ${data.result}</p>`;
+            document.getElementById('qaragUserInput').value = ''; // Clear input after sending
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Failed to process the question.');
+        });
+    }
+=======
+>>>>>>> 2ffd424 (Initial commit - reset history)
+</script>
