@@ -13,7 +13,7 @@
 
 # RAG
 
-<img src="https://github.com/Deeyou00/capstone/AuditingChatbot-main/statics/rag.png"></img>  	
+<img src="https://github.com/Deeyou00/capstone/blob/main/AuditingChatbot-main/statics/rag.png"></img>  	
 
 # Fraud Detection
 	Prepare 5 key item + LLM output
